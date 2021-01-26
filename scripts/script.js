@@ -20,31 +20,50 @@ window.onload = function(){
             block[i].setAttribute('ondragstart', 'drag(this, event)');
         }
     }
-    function createBlock(){
-        var backlog = document.getElementById("backlog"),
-            i_container = document.getElementById("create-issue-container"),
-            i_main = document.getElementById("create-issue"),
-            type = document.getElementsByName("issue-type")[0].value,
-            summary = document.getElementsByName("summary")[0].value,
-            description = document.getElementsByName("description")[0].value,
-            reporter = document.getElementsByName("reporter")[0].value,
-            assignees = document.getElementsByName("assignees")[0].value;
-    
-        if ( ! ( summary && description && reporter && assignees) ){
-            alert("Please fill all of the fields!");
-            return 1;
-        }
-        var newBlock = document.createElement("div");
-        newBlock.classList.add("block");
-        newBlock.setAttribute('draggable', 'true');
-        newBlock.setAttribute('ondragstart', 'drag(this, event)');
-        newBlock.innerHTML = summary;
+}
 
-        i_container.setAttribute("style", "display: none;");
-        i_main.setAttribute("style", "display: none;");
-        backlog.appendChild(newBlock);
-        checkHeight()
+function createBlock(){
+    var backlog = document.getElementById("backlog"),
+        i_container = document.getElementById("create-issue-container"),
+        i_main = document.getElementById("create-issue"),
+        type = document.getElementsByName("issue-type")[0].value,
+        summary = document.getElementsByName("summary")[0].value,
+        priority = document.getElementsByName("priority")[0].value,
+        description = document.getElementsByName("description")[0].value,
+        reporter = document.getElementsByName("reporter")[0].value,
+        assignees = document.getElementsByName("assignees")[0].value;
+
+    if ( ! ( summary && description && reporter && assignees && type && priority) ){
+        alert("Please fill all of the fields!");
+        return 1;
     }
+    var newBlock = document.createElement("div");
+    newBlock.classList.add("block");
+    newBlock.setAttribute('draggable', 'true');
+    newBlock.setAttribute('ondragstart', 'drag(this, event)');
+    
+    newBlock.innerHTML = summary;
+
+    newBlock.appendChild(createData("summary", summary));
+    newBlock.appendChild(createData("priority", priority));
+    newBlock.appendChild(createData("type", type));
+    newBlock.appendChild(createData("description", description));
+    newBlock.appendChild(createData("reporter", reporter));
+    newBlock.appendChild(createData("assignees", assignees));
+
+    i_container.setAttribute("style", "display: none;");
+    i_main.setAttribute("style", "display: none;");
+    newBlock.addEventListener("click", blockClick);
+    backlog.appendChild(newBlock);
+    checkHeight()
+}
+
+function createData(name, value){
+    var data=document.createElement("data");
+    data.value = name;
+    data.style.display = "none";
+    data.innerHTML = value;
+    return data;
 }
 
 function init(){
@@ -174,6 +193,18 @@ function blockClick(){
             istyle = "background: green; color: white;";
             break;
     }
+    assi = getIcon(assignees);
+    rep = getIcon(reporter);
+    createHeader("Issue Type: <span class=\"block-value left-30\" style=\"text-transform: capitalize;"+ istyle +"\">" + type + "</span>", box, true);
+    createHeader("Priority: <span class=\"block-value left-30\" style=\"text-transform: capitalize;"+ pstyle +"\">" + priority + "( Tap To Change ) </span>", box, true);
+    createHeader("Summary: <span class=\"block-value\" style=\"display: block;\">" + summary + "</span>", box, true);
+    createHeader("Description:<br> <span class=\"block-value\" style=\"display: block;\">" + description + "</span>", box, true);
+    createHeader("Reporter: <span class=\"block-value user left-30\" style=\"text-transform: capitalize;\">" + reporter + rep +"</span>", box, true);
+    createHeader("Assignees: <span class=\"block-value user left-30\" style=\"text-transform: capitalize;\">" + assignees + assi + "</span>", box, true);
+}
+
+function getIcon(reporter){
+    var rep;
     switch(reporter){
         case "you":
             rep = "<span class=\"avatar-you-icon right\"></span>";
@@ -185,23 +216,7 @@ function blockClick(){
             rep = "<span class=\"avatar-else-icon right\"></span>";
             break;
     }
-    switch(assignees){
-        case "you":
-            assi = "<span class=\"avatar-you-icon right\"></span>";
-            break;
-        case "me":
-            assi = "<span class=\"avatar-me-icon right\"></span>";
-            break;
-        case "else":
-            assi = "<span class=\"avatar-else-icon right\"></span>";
-            break;
-    }
-    createHeader("Issue Type: <span class=\"block-value left-30\" style=\"text-transform: capitalize;"+ istyle +"\">" + type + "</span>", box, true);
-    createHeader("Priority: <span class=\"block-value left-30\" style=\"text-transform: capitalize;"+ pstyle +"\">" + priority + "( Tap To Change ) </span>", box, true);
-    createHeader("Summary: <span class=\"block-value\" style=\"display: block;\">" + summary + "</span>", box, true);
-    createHeader("Description:<br> <span class=\"block-value\" style=\"display: block;\">" + description + "</span>", box, true);
-    createHeader("Reporter: <span class=\"block-value user left-30\" style=\"text-transform: capitalize;\">" + reporter + rep +"</span>", box, true);
-    createHeader("Assignees: <span class=\"block-value user left-30\" style=\"text-transform: capitalize;\">" + assignees + assi + "</span>", box, true);
+    return rep;
 }
 
 function createHeader(html, parent, nl){
